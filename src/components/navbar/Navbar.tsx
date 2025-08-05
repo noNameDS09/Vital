@@ -59,7 +59,7 @@ const Navbar = () => {
               <button
                 // key={item}
                 // href=""
-                onClick={() => router.push(`/about}`)}
+                onClick={() => router.push(`/about`)}
                 className="text-[var(--sidebar-foreground)] hover:text-[var(--sidebar-primary)] transition-colors text-sm font-medium"
               >
                 About
