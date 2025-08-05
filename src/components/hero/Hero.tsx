@@ -1,9 +1,9 @@
 'use client'
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles, BarChart2, ShieldCheck } from 'lucide-react';
 import { Inter, Roboto } from 'next/font/google';
-
+import { HoverEffect } from '../ui/card-hover-effect';
 
 const inter = Inter({
     weight: ['400', '700'],
@@ -16,7 +16,32 @@ const roboto = Roboto({
     subsets: ['latin'],
 })
 
+export const features = [
+  {
+    title: "Predictive AI",
+    description:
+      "Proactively identify subtle signs of patient deterioration before they become critical, giving medical staff a crucial window for intervention.",
+    icon: <Sparkles size={40} />,
+  },
+  {
+    title: "Explainable Insights",
+    description:
+      "Get clear, data-driven explanations for every alert, so you can understand the \"why\" behind the \"what\" and act with confidence.",
+    icon: <BarChart2 size={40} />,
+  },
+  {
+    title: "Real-time Security",
+    description:
+      "Secure, real-time data processing and role-based alerts ensure the right information reaches the right person at the right time.",
+    icon: <ShieldCheck size={40} />,
+  },
+];
+
+
 const Hero = () => {
+  useEffect(() => {
+  window.scrollTo(0, 0);
+}, []);
   const containerVariants = {
     hidden: { opacity: 0 },
     show: {
@@ -27,13 +52,13 @@ const Hero = () => {
     },
   };
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.6 } },
-  };
+  // const itemVariants = {
+  //   hidden: { opacity: 0, y: 20 },
+  //   show: { opacity: 1, y: 0, transition: { duration: 0.6 } },
+  // };
 
   return (
-    <div className="relative overflow-hidden w-full min-h-screen flex items-center justify-center bg-[var(--background)] text-[var(--foreground)] py-20">
+    <div className="relative overflow-hidden w-full min-h-screen flex items-center justify-center bg-[var(--background)] text-[var(--foreground)] py-20 mt-10">
       <motion.div
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[30rem] h-[30rem] md:w-[45rem] md:h-[45rem] rounded-full bg-[var(--sidebar-primary)] opacity-10 blur-3xl"
         animate={{
@@ -84,7 +109,7 @@ const Hero = () => {
           </motion.button>
         </motion.div>
 
-        <motion.div
+        {/* <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="show"
@@ -117,7 +142,8 @@ const Hero = () => {
               Secure, real-time data processing and role-based alerts ensure the right information reaches the right person at the right time.
             </p>
           </motion.div>
-        </motion.div>
+        </motion.div> */}
+        <HoverEffect items={features} />
       </div>
     </div>
   );
