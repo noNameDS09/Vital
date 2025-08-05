@@ -52,7 +52,7 @@ export const patients: Patient[] = [
       { time: '10:45', hr: 82, spo2: 95, bp_sys: 128, bp_dia: 85 },
       { time: '11:00', hr: 85, spo2: 94, bp_sys: 130, bp_dia: 86 },
       { time: '11:15', hr: 84, spo2: 93, bp_sys: 129, bp_dia: 85 },
-      { time: '11:30', hr: 86, spo2: 92, bp_sys: 132, bp_dia: 88 },
+      { time: '11:30', hr: 78, spo2: 88, bp_sys: 128, bp_dia: 88 },
       { time: '11:45', hr: 88, spo2: 91, bp_sys: 135, bp_dia: 90 },
       { time: '12:00', hr: 90, spo2: 90, bp_sys: 140, bp_dia: 92 },
     ],

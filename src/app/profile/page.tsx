@@ -141,10 +141,10 @@ const App = () => {
           </h1>
         </div>
         <div className="flex gap-6 ">
-          <button onClick={() => router.push("/add-patient")} className="bg-blue-600 px-3 py-1 rounded-md">
+          <button onClick={() => router.push("/add-patient")} className="bg-blue-600 hover:cursor-pointer px-3 py-1 rounded-md">
             Add Patient
           </button>
-          <button onClick={() => router.push("/update-patient")} className="bg-blue-600 p-4 py-1 rounded-md">
+          <button onClick={() => router.push("/update-patient")} className="bg-blue-600 hover:cursor-pointer p-4 py-1 rounded-md">
             Update Patients
           </button>
         </div>
