@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   LineChart,
   Line,
@@ -10,8 +10,6 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { Heart, Droplet, Sun, Bell, User, Atom } from "lucide-react";
-import { patients } from "./data";
-import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 
 const VitalCard = ({ name, value, unit, icon, color, threshold }) => {
@@ -119,37 +117,47 @@ const AlertsCard = ({ alerts }) => (
   </div>
 );
 
-const App = () => {
-  const [selectedPatient, setSelectedPatient] = useState(patients[0]);
+const Dashboard = () => {
+  const [patients, setPatients] = useState([]);
+  const [selectedPatient, setSelectedPatient] = useState(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    const fetchPatients = async () => {
+      const res = await fetch("/api/patient/vitals");
+      const json = await res.json();
+      setPatients(json.patients);
+      setSelectedPatient(json.patients[0]);
+    };
+    fetchPatients();
+  }, []);
 
   const handleSelectChange = (e) => {
     const selectedId = e.target.value;
-    const foundPatient = patients.find((p) => p.id.toString() === selectedId);
-    if (foundPatient) {
-      setSelectedPatient(foundPatient);
-    }
+    const found = patients.find((p) => p.id.toString() === selectedId);
+    if (found) setSelectedPatient(found);
   };
-  const router = useRouter();
+
+  if (!selectedPatient) return <div className="p-8">Loading...</div>;
 
   return (
     <div className="bg-[var(--background)] min-h-screen p-8 text-[var(--foreground)] font-sans mt-16">
       <div className="container mx-auto">
         <div className="flex justify-between mb-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between mb-0">
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
-            Patient Dashboard
-          </h1>
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
+              Patient Dashboard
+            </h1>
+          </div>
+          <div className="flex gap-6 ">
+            <button onClick={() => router.push("/add-patient")} className="bg-blue-600 hover:cursor-pointer px-3 py-1 rounded-md">
+              Add Patient
+            </button>
+            <button onClick={() => router.push("/update-patient")} className="bg-blue-600 hover:cursor-pointer p-4 py-1 rounded-md">
+              Update Patients
+            </button>
+          </div>
         </div>
-        <div className="flex gap-6 ">
-          <button onClick={() => router.push("/add-patient")} className="bg-blue-600 hover:cursor-pointer px-3 py-1 rounded-md">
-            Add Patient
-          </button>
-          <button onClick={() => router.push("/update-patient")} className="bg-blue-600 hover:cursor-pointer p-4 py-1 rounded-md">
-            Update Patients
-          </button>
-        </div>
-        </div>
-        {/* Patient Dropdown */}
         <div className="mb-8">
           <h2 className="text-2xl font-bold mb-4">Select Patient</h2>
           <div className="max-w-xs">
@@ -167,14 +175,12 @@ const App = () => {
             >
               {patients.map((patient) => (
                 <option key={patient.id} value={patient.id}>
-                  {patient.name} (ID: {patient.patientId})
+                  {patient.name} ({patient.patientId})
                 </option>
               ))}
             </select>
           </div>
         </div>
-
-        {/* Main Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-250px)]">
           <div className="lg:col-span-2">
             <ChartCard vitalData={selectedPatient.vitalData} />
@@ -188,7 +194,7 @@ const App = () => {
                 <div>
                   <h3 className="text-xl font-bold">{selectedPatient.name}</h3>
                   <p className="text-[var(--muted-foreground)]">
-                    ID: {selectedPatient.patientId}
+                    {selectedPatient.patientId}
                   </p>
                 </div>
               </div>
@@ -202,12 +208,8 @@ const App = () => {
                   <p className="font-semibold">{selectedPatient.room}</p>
                 </div>
                 <div>
-                  <p className="text-[var(--muted-foreground)]">
-                    Admission Date
-                  </p>
-                  <p className="font-semibold">
-                    {selectedPatient.admissionDate}
-                  </p>
+                  <p className="text-[var(--muted-foreground)]">Admission Date</p>
+                  <p className="font-semibold">{selectedPatient.admissionDate}</p>
                 </div>
                 <div>
                   <p className="text-[var(--muted-foreground)]">Condition</p>
@@ -220,9 +222,7 @@ const App = () => {
             <AlertsCard alerts={selectedPatient.alerts} />
           </div>
         </div>
-
-        {/* Vital Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-40">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-20">
           {selectedPatient.vitalCards.map((vital) => (
             <VitalCard key={vital.name} {...vital} />
           ))}
@@ -232,4 +232,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default Dashboard;
