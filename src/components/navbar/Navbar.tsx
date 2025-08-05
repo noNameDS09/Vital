@@ -46,16 +46,24 @@ const Navbar = () => {
 
           {/* Navigation Links */}
           <div className="hidden md:flex items-center space-x-6">
-            {['Dashboard', 'About'].map((item) => (
+            {['Dashboard'].map((item) => (
               <button
                 key={item}
                 // href=""
-                onClick={() => router.push(`/${item}`)}
+                onClick={() => router.push(`/profile`)}
                 className="text-[var(--sidebar-foreground)] hover:text-[var(--sidebar-primary)] transition-colors text-sm font-medium"
               >
                 {item}
               </button>
             ))}
+              <button
+                // key={item}
+                // href=""
+                onClick={() => router.push(`/about}`)}
+                className="text-[var(--sidebar-foreground)] hover:text-[var(--sidebar-primary)] transition-colors text-sm font-medium"
+              >
+                About
+              </button>
           </div>
 
           {/* Right Section */}

@@ -1,5 +1,5 @@
-'use client'
-import React, { useState } from 'react';
+"use client";
+import React, { useState } from "react";
 import {
   LineChart,
   Line,
@@ -8,23 +8,32 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-} from 'recharts';
-import { Heart, Droplet, Sun, Bell, User, Atom } from 'lucide-react';
-import { patients } from './data';
+} from "recharts";
+import { Heart, Droplet, Sun, Bell, User, Atom } from "lucide-react";
+import { patients } from "./data";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 const VitalCard = ({ name, value, unit, icon, color, threshold }) => {
   let displayColor = color;
-  if (name === 'Heart Rate' && (value < threshold.critical[0] || value > threshold.critical[1])) {
-    displayColor = 'var(--destructive)';
-  } else if (name === 'SpO₂' && (value < threshold.critical[0] || value > threshold.critical[1])) {
-    displayColor = 'var(--destructive)';
+  if (
+    name === "Heart Rate" &&
+    (value < threshold.critical[0] || value > threshold.critical[1])
+  ) {
+    displayColor = "var(--destructive)";
+  } else if (
+    name === "SpO₂" &&
+    (value < threshold.critical[0] || value > threshold.critical[1])
+  ) {
+    displayColor = "var(--destructive)";
   }
 
   return (
     <div className="p-6 rounded-2xl bg-[var(--card)] border border-[var(--border)] shadow-lg">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-[var(--muted-foreground)]">{name}</h3>
+        <h3 className="text-lg font-semibold text-[var(--muted-foreground)]">
+          {name}
+        </h3>
         <div className="text-[var(--primary)]" style={{ color }}>
           {icon}
         </div>
@@ -49,11 +58,11 @@ const ChartCard = ({ vitalData }) => (
         <YAxis stroke="var(--muted-foreground)" />
         <Tooltip
           contentStyle={{
-            backgroundColor: 'var(--card)',
-            border: '1px solid var(--border)',
-            borderRadius: '0.5rem',
+            backgroundColor: "var(--card)",
+            border: "1px solid var(--border)",
+            borderRadius: "0.5rem",
           }}
-          labelStyle={{ color: 'var(--primary)' }}
+          labelStyle={{ color: "var(--primary)" }}
         />
         <Line
           type="monotone"
@@ -95,7 +104,9 @@ const AlertsCard = ({ alerts }) => (
         <li
           key={alert.id}
           className={`py-3 border-b border-[var(--border)] last:border-b-0 ${
-            alert.severity === 'critical' ? 'text-[var(--destructive)]' : 'text-[var(--chart-2)]'
+            alert.severity === "critical"
+              ? "text-[var(--destructive)]"
+              : "text-[var(--chart-2)]"
           }`}
         >
           <div className="font-semibold">{alert.message}</div>
@@ -118,21 +129,34 @@ const App = () => {
       setSelectedPatient(foundPatient);
     }
   };
+  const router = useRouter();
 
   return (
     <div className="bg-[var(--background)] min-h-screen p-8 text-[var(--foreground)] font-sans mt-16">
       <div className="container mx-auto">
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
+        <div className="flex justify-between mb-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between mb-0">
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
             Patient Dashboard
           </h1>
         </div>
-
+        <div className="flex gap-6 ">
+          <button onClick={() => router.push("/add-patient")} className="bg-blue-600 px-3 py-1 rounded-md">
+            Add Patient
+          </button>
+          <button onClick={() => router.push("/update-patient")} className="bg-blue-600 p-4 py-1 rounded-md">
+            Update Patients
+          </button>
+        </div>
+        </div>
         {/* Patient Dropdown */}
         <div className="mb-8">
           <h2 className="text-2xl font-bold mb-4">Select Patient</h2>
           <div className="max-w-xs">
-            <label htmlFor="patient-select" className="block text-sm font-medium text-[var(--muted-foreground)] mb-2">
+            <label
+              htmlFor="patient-select"
+              className="block text-sm font-medium text-[var(--muted-foreground)] mb-2"
+            >
               Patient List
             </label>
             <select
@@ -163,7 +187,9 @@ const App = () => {
                 </div>
                 <div>
                   <h3 className="text-xl font-bold">{selectedPatient.name}</h3>
-                  <p className="text-[var(--muted-foreground)]">ID: {selectedPatient.patientId}</p>
+                  <p className="text-[var(--muted-foreground)]">
+                    ID: {selectedPatient.patientId}
+                  </p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4 text-sm mt-6">
@@ -176,12 +202,18 @@ const App = () => {
                   <p className="font-semibold">{selectedPatient.room}</p>
                 </div>
                 <div>
-                  <p className="text-[var(--muted-foreground)]">Admission Date</p>
-                  <p className="font-semibold">{selectedPatient.admissionDate}</p>
+                  <p className="text-[var(--muted-foreground)]">
+                    Admission Date
+                  </p>
+                  <p className="font-semibold">
+                    {selectedPatient.admissionDate}
+                  </p>
                 </div>
                 <div>
                   <p className="text-[var(--muted-foreground)]">Condition</p>
-                  <p className="font-semibold text-[var(--chart-3)]">{selectedPatient.condition}</p>
+                  <p className="font-semibold text-[var(--chart-3)]">
+                    {selectedPatient.condition}
+                  </p>
                 </div>
               </div>
             </div>
