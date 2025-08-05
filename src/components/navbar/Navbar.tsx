@@ -59,7 +59,7 @@ const Navbar = () => {
               <button
                 // key={item}
                 // href=""
-                onClick={() => router.push(`/about`)}
+                onClick={() => router.push(`/About`)}
                 className="text-[var(--sidebar-foreground)] hover:text-[var(--sidebar-primary)] transition-colors text-sm font-medium"
               >
                 About
@@ -76,8 +76,8 @@ const Navbar = () => {
               {theme === 'dark' ? <Lightbulb size={22} /> : <Moon size={22} />}
             </button>
 
-            <button onClick={()=> router.push('/profile')} className="hidden md:block text-sm font-medium text-[var(--sidebar-foreground)] hover:cursor-pointer">
-              User
+            <button onClick={()=> router.push('/login')} className="hidden md:block text-sm font-medium text-[var(--sidebar-foreground)] hover:cursor-pointer">
+              Login
             </button>
           </div>
         </div>

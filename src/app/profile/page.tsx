@@ -222,7 +222,7 @@ const App = () => {
         </div>
 
         {/* Vital Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-40">
           {selectedPatient.vitalCards.map((vital) => (
             <VitalCard key={vital.name} {...vital} />
           ))}

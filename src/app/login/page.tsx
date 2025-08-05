@@ -39,7 +39,7 @@ localStorage.setItem('access_token', data.access_token);
       } else {
         // Optional: store tokens in localStorage or cookie
         // localStorage.setItem('token', data.access_token);
-        router.push('/dashboard');
+        router.push('/profile');
       }
     } catch (err) {
       console.error(err);
