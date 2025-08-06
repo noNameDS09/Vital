@@ -1,4 +1,4 @@
-# 🩺 Medical Dashboard App (React Native)
+# 🩺 Medical Dashboard App (WebApp)
 
 A Web app that displays real-time patient vitals, alerts, and profile info and integrates with a **Supabase** backend.
 
