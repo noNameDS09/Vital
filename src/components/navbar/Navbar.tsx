@@ -10,7 +10,15 @@ const Navbar = () => {
   const { theme, toggleTheme } = useTheme();
   const [prevScrollPos, setPrevScrollPos] = useState(0);
   const [visible, setVisible] = useState(true);
-  const router = useRouter()
+  const router = useRouter();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    // Check for token in localStorage to detect login
+    const token = localStorage.getItem('access_token');
+    setIsLoggedIn(!!token);
+  }, []);
+
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollPos = window.scrollY;
@@ -39,9 +47,12 @@ const Navbar = () => {
       >
         <div className="container mx-auto flex items-center justify-between">
           {/* Logo Section */}
-          <button onClick={()=> router.push('/')} className="flex items-center space-x-2 hover:cursor-pointer">
+          <button
+            onClick={() => router.push('/')}
+            className="flex items-center space-x-2 hover:cursor-pointer"
+          >
             <ShieldAlert className="text-[var(--sidebar-primary)]" size={28} />
-            <span  className="text-xl font-bold tracking-tight">VITAL</span>
+            <span className="text-xl font-bold tracking-tight">VITAL</span>
           </button>
 
           {/* Navigation Links */}
@@ -49,21 +60,18 @@ const Navbar = () => {
             {['Dashboard'].map((item) => (
               <button
                 key={item}
-                // href=""
                 onClick={() => router.push(`/profile`)}
                 className="text-[var(--sidebar-foreground)] hover:text-[var(--sidebar-primary)] transition-colors text-sm font-medium"
               >
                 {item}
               </button>
             ))}
-              <button
-                // key={item}
-                // href=""
-                onClick={() => router.push(`/About`)}
-                className="text-[var(--sidebar-foreground)] hover:text-[var(--sidebar-primary)] transition-colors text-sm font-medium"
-              >
-                About
-              </button>
+            <button
+              onClick={() => router.push(`/About`)}
+              className="text-[var(--sidebar-foreground)] hover:text-[var(--sidebar-primary)] transition-colors text-sm font-medium"
+            >
+              About
+            </button>
           </div>
 
           {/* Right Section */}
@@ -76,9 +84,21 @@ const Navbar = () => {
               {theme === 'dark' ? <Lightbulb size={22} /> : <Moon size={22} />}
             </button>
 
-            <button onClick={()=> router.push('/login')} className="hidden md:block text-sm font-medium text-[var(--sidebar-foreground)] hover:cursor-pointer">
-              Login
-            </button>
+            {isLoggedIn ? (
+              <button
+                onClick={() => router.push('/user')}
+                className="hidden md:block text-sm font-medium text-[var(--sidebar-foreground)] hover:cursor-pointer"
+              >
+                User
+              </button>
+            ) : (
+              <button
+                onClick={() => router.push('/login')}
+                className="hidden md:block text-sm font-medium text-[var(--sidebar-foreground)] hover:cursor-pointer"
+              >
+                Login
+              </button>
+            )}
           </div>
         </div>
       </motion.nav>

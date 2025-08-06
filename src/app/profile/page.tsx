@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import React, { useEffect, useState } from "react";
 import {
   LineChart,
@@ -9,22 +9,79 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { Heart, Droplet, Sun, Bell, User, Atom } from "lucide-react";
+import { Heart, Atom, Droplet, Bell, User, Sun } from "lucide-react"; // Ensure all Lucide icons are imported
 import { useRouter } from "next/navigation";
 
+// Define the Patient interface based on your API response structure
+interface Patient {
+  id: number;
+  name: string;
+  patientId: string;
+  age: number;
+  room: string;
+  admissionDate: string;
+  condition: string;
+  vitalData: {
+    time: string;
+    hr: number;
+    spo2: number;
+    bp_sys: number;
+    bp_dia: number;
+  }[];
+  alerts: {
+    id: number;
+    message: string;
+    timestamp: string;
+    severity: 'critical' | 'warning';
+  }[];
+  vitalCards: {
+    name: string;
+    value: number | string;
+    unit: string;
+    icon: string; // Changed to string as per your data.ts for React Native
+    color: string;
+    threshold: { critical: number[]; warning: number[] };
+  }[];
+}
+
+
 const VitalCard = ({ name, value, unit, icon, color, threshold }) => {
+  let IconComponent;
+  switch (icon) {
+    case 'heart':
+      IconComponent = Heart;
+      break;
+    case 'atom':
+      IconComponent = Atom;
+      break;
+    case 'droplet':
+      IconComponent = Droplet;
+      break;
+    case 'sun': // Assuming 'sun' might be used for BP in your data
+      IconComponent = Sun;
+      break;
+    default:
+      IconComponent = Heart; // Default icon
+  }
+
   let displayColor = color;
   if (
     name === "Heart Rate" &&
-    (value < threshold.critical[0] || value > threshold.critical[1])
+    (typeof value === 'number' && (value < threshold.critical[0] || value > threshold.critical[1]))
   ) {
     displayColor = "var(--destructive)";
   } else if (
     name === "SpO₂" &&
-    (value < threshold.critical[0] || value > threshold.critical[1])
+    (typeof value === 'number' && (value < threshold.critical[0] || value > threshold.critical[1]))
+  ) {
+    displayColor = "var(--destructive)";
+  } else if (
+    name === "Blood Pressure" &&
+    typeof value === 'string' && (parseInt(value.split('/')[0]) > threshold.critical[1] || parseInt(value.split('/')[0]) < threshold.critical[0])
   ) {
     displayColor = "var(--destructive)";
   }
+
 
   return (
     <div className="p-6 rounded-2xl bg-[var(--card)] border border-[var(--border)] shadow-lg">
@@ -33,7 +90,7 @@ const VitalCard = ({ name, value, unit, icon, color, threshold }) => {
           {name}
         </h3>
         <div className="text-[var(--primary)]" style={{ color }}>
-          {icon}
+          {IconComponent && <IconComponent size={24} />}
         </div>
       </div>
       <div className="text-4xl font-bold" style={{ color: displayColor }}>
@@ -46,7 +103,7 @@ const VitalCard = ({ name, value, unit, icon, color, threshold }) => {
   );
 };
 
-const ChartCard = ({ vitalData }) => (
+const ChartCard = ({ vitalData, selectedAttributes }) => (
   <div className="p-6 rounded-2xl bg-[var(--card)] border border-[var(--border)] shadow-lg h-full">
     <h3 className="text-xl font-bold mb-4">Patient Vitals Trend</h3>
     <ResponsiveContainer width="100%" height="80%">
@@ -62,34 +119,22 @@ const ChartCard = ({ vitalData }) => (
           }}
           labelStyle={{ color: "var(--primary)" }}
         />
-        <Line
-          type="monotone"
-          dataKey="hr"
-          stroke="var(--primary)"
-          strokeWidth={2}
-          name="Heart Rate"
-          dot={false}
-        />
-        <Line
-          type="monotone"
-          dataKey="spo2"
-          stroke="var(--chart-4)"
-          strokeWidth={2}
-          name="SpO₂"
-          dot={false}
-        />
-        <Line
-          type="monotone"
-          dataKey="bp_sys"
-          stroke="var(--chart-2)"
-          strokeWidth={2}
-          name="Systolic BP"
-          dot={false}
-        />
+        {selectedAttributes.map((key, index) => (
+          <Line
+            key={key}
+            type="monotone"
+            dataKey={key}
+            stroke={`var(--chart-${(index % 5) + 1})`}
+            strokeWidth={2}
+            name={key}
+            dot={false}
+          />
+        ))}
       </LineChart>
     </ResponsiveContainer>
   </div>
 );
+
 
 const AlertsCard = ({ alerts }) => (
   <div className="p-6 rounded-2xl bg-[var(--card)] border border-[var(--border)] shadow-lg">
@@ -118,27 +163,77 @@ const AlertsCard = ({ alerts }) => (
 );
 
 const Dashboard = () => {
-  const [patients, setPatients] = useState([]);
-  const [selectedPatient, setSelectedPatient] = useState(null);
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedChartAttributes, setSelectedChartAttributes] = useState<string[]>(['hr']); // Initially select only heart rate
   const router = useRouter();
 
   useEffect(() => {
-    const fetchPatients = async () => {
-      const res = await fetch("/api/patient/vitals");
-      const json = await res.json();
-      setPatients(json.patients);
-      setSelectedPatient(json.patients[0]);
+    const fetchData = async () => {
+      try {
+        const res = await fetch("/api/patient/vitals");
+        const data = await res.json();
+        setPatients(data.patients);
+
+        if (data.patients.length > 0) {
+          setSelectedPatient(data.patients[0]);
+          // Keep the initial selection as 'hr' only
+          setSelectedChartAttributes(['hr']);
+        }
+      } catch (error) {
+        console.error("Failed to fetch patient data", error);
+      } finally {
+        setLoading(false);
+      }
     };
-    fetchPatients();
+
+    fetchData();
   }, []);
 
-  const handleSelectChange = (e) => {
-    const selectedId = e.target.value;
-    const found = patients.find((p) => p.id.toString() === selectedId);
-    if (found) setSelectedPatient(found);
+  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedId = parseInt(e.target.value);
+    const foundPatient = patients.find((p) => p.id === selectedId);
+    if (foundPatient) {
+      setSelectedPatient(foundPatient);
+    }
   };
 
-  if (!selectedPatient) return <div className="p-8">Loading...</div>;
+  // Handler for chart attribute checkboxes with max 3 selection limit (case insensitive)
+  const handleChartAttributeChange = (attribute: string) => {
+    setSelectedChartAttributes((prev) => {
+      // Case insensitive comparison
+      const isAlreadySelected = prev.some(item => item.toLowerCase() === attribute.toLowerCase());
+      
+      if (isAlreadySelected) {
+        // If attribute is already selected, remove it (case insensitive)
+        return prev.filter((item) => item.toLowerCase() !== attribute.toLowerCase());
+      } else if (prev.length < 3) {
+        // If less than 3 attributes selected, add the new one
+        return [...prev, attribute];
+      } else {
+        // If already 3 attributes selected, show an alert and don't add
+        alert('You can select a maximum of 3 vital signs for the chart.');
+        return prev;
+      }
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[var(--background)] text-[var(--foreground)]">
+        <p>Loading patient data...</p>
+      </div>
+    );
+  }
+
+  if (!selectedPatient) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[var(--background)] text-[var(--foreground)]">
+        <p>No patient data available.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-[var(--background)] min-h-screen p-8 text-[var(--foreground)] font-sans mt-16">
@@ -158,6 +253,7 @@ const Dashboard = () => {
             </button>
           </div>
         </div>
+
         <div className="mb-8">
           <h2 className="text-2xl font-bold mb-4">Select Patient</h2>
           <div className="max-w-xs">
@@ -175,15 +271,53 @@ const Dashboard = () => {
             >
               {patients.map((patient) => (
                 <option key={patient.id} value={patient.id}>
-                  {patient.name} ({patient.patientId})
+                  {patient.name} (ID: {patient.patientId})
                 </option>
               ))}
             </select>
           </div>
         </div>
+
+        {/* Chart Attribute Selection */}
+        <div className="mb-8 p-4 rounded-lg bg-[var(--card)] border border-[var(--border)] shadow-lg">
+          <h3 className="text-xl font-bold mb-4">Chart Display Options</h3>
+          <p className="text-sm text-[var(--muted-foreground)] mb-3">
+            Select up to 3 vital signs to display in the chart ({selectedChartAttributes.length}/3 selected)
+          </p>
+          <div className="flex flex-wrap gap-4">
+            {selectedPatient?.vitalData?.[0] &&
+              Object.keys(selectedPatient.vitalData[0])
+                .filter((key) => key !== "time" && key !== 'id' && key !== 'pid')
+                .map((key) => {
+                  // Case insensitive check for selection
+                  const isSelected = selectedChartAttributes.some(attr => attr.toLowerCase() === key.toLowerCase());
+                  const isDisabled = !isSelected && selectedChartAttributes.length >= 3;
+                  
+                  return (
+                    <label 
+                      key={key} 
+                      className={`flex items-center space-x-2 ${
+                        isDisabled ? 'text-[var(--muted-foreground)] cursor-not-allowed' : 'text-[var(--foreground)] cursor-pointer'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        className="form-checkbox h-5 w-5 text-[var(--primary)] bg-[var(--input)] border-[var(--border)] rounded disabled:opacity-50"
+                        checked={isSelected}
+                        disabled={isDisabled}
+                        onChange={() => handleChartAttributeChange(key)}
+                      />
+                      <span className={isDisabled ? 'opacity-50' : ''}>{key.toUpperCase()}</span>
+                    </label>
+                  );
+                })}
+          </div>
+        </div>
+
+        {/* Main Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-250px)]">
           <div className="lg:col-span-2">
-            <ChartCard vitalData={selectedPatient.vitalData} />
+            <ChartCard vitalData={selectedPatient.vitalData} selectedAttributes={selectedChartAttributes} />
           </div>
           <div className="flex flex-col gap-6">
             <div className="p-6 rounded-2xl bg-[var(--card)] border border-[var(--border)] shadow-lg">
@@ -194,7 +328,7 @@ const Dashboard = () => {
                 <div>
                   <h3 className="text-xl font-bold">{selectedPatient.name}</h3>
                   <p className="text-[var(--muted-foreground)]">
-                    {selectedPatient.patientId}
+                    ID: {selectedPatient.patientId}
                   </p>
                 </div>
               </div>

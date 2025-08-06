@@ -36,13 +36,8 @@ export async function GET() {
         .eq('pid', patient.patient_id)
         .order('time', { ascending: true });
 
-      const vitalData = (vitalsData || []).map((v) => ({
-        time: v.time,
-        hr: v.hr,
-        spo2: v.fio2 * 100, // assuming FiO2 in 0-1 range
-        bp_sys: v.sysabp,
-        bp_dia: v.diasabp,
-      }));
+       const vitalData = vitalsData || [];
+
 
       // Step 4: Build vitalCards
       const latest = vitalsData?.[vitalsData.length - 1];
